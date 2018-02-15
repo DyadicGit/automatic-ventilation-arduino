@@ -1,0 +1,32 @@
+void handleFan(){
+  digitalWrite(relay1Pin, HIGH);
+  digitalWrite(relay2Pin, HIGH);
+
+  if (LCDState) {
+    lcd.clear();
+    lcd.setCursor(0, 0);
+    lcd.print("fan working");
+    int timeCounter = (int) round(fanManualWorkTime/1000);
+    while (timeCounter>=0 && fanState) {
+      if (isDelayTime(1000)) {
+        lcd.setCursor(0, 1);
+        lcd.print(timeCounter);
+        if (timeCounter < 10000) {lcd.print("    ");}
+        timeCounter--;
+      }
+      turnOnOffLCD();
+    }
+    lcd.clear();
+    printValuesOnLCD();
+  } else {
+    //holds the fan ON
+    int timeCounter = (int) round(fanManualWorkTime/1000);
+    while (timeCounter>=0 && fanState) {
+      if (isDelayTime(1000)) {
+        timeCounter--;
+      }
+      turnOnOffLCD();
+    }
+  }
+  fanState = LOW;
+}
