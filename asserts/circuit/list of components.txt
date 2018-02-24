@@ -1,0 +1,11 @@
+Bill of Materials:
+1) 128x32 I2C SSD1306 OLED display
+2) NTC MF52 series 103 type 10K ohm 1% Thermistor
+3) 10K Ohm resistor (Thermistor load resistance)
+4) MQ-9 Gas sensor
+5) MQ-135 Gas sensor
+6) 2x Momentary buttons
+7) 2x resistors for those buttons
+8) 2x LED (for indication)
+9) 2x resistors for those LEDS (remember R = (U-U_led)/I, for a white/blue LED R=(5-3)/0.02)
+10) Arduino UNO R3 or Atmega328P
