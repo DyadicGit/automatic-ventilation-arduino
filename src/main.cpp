@@ -5,10 +5,10 @@
 #include "../lib/SteinhartHartEquation/SteinhartHartEquation.h"
 
 //User variables:
-const int loopEvery = 1000;  //<-- set time to read the value every (in mili seconds)
-const int gasValue = 200; // <-- set this when to clear the air
+const int loopEvery = 500;  //<-- set time to read the value every (in mili seconds)
+const int gasValue = 250; // <-- set this when to clear the air
 const unsigned long int fanManualWorkTime = 10000;       // set manual fan working time
-const unsigned long int fanAutomaticWorkTime = 3000;    // set automatic fan working time
+const unsigned long int fanAutomaticWorkTime = 5000;    // set automatic fan working time
 
 //machines variables:
 const int sensorCO2Pin = A0;
@@ -103,7 +103,9 @@ void loop() {
 
   if (isLoopTime()) {
     sensorCO2Read = analogRead(sensorCO2Pin);
+    sensorCO2Read = floor(sensorCO2Read/10)*10;
     sensorCH4Read = analogRead(sensorCH4Pin);
+    sensorCH4Read = floor(sensorCH4Read/10)*10;
     sensorTempRead = analogRead(sensorTempPin);
     float sensorTempResistance = getResistance(sensorTempRead, sensorTempVin, sensorTempLoadResistance);
     sensorTempValue = sensorTemp.getTempCelsius(sensorTempResistance);
@@ -214,6 +216,7 @@ void printValuesOnLCD() {
     u8x8.setCursor(0, rowCO2);
     u8x8.print("CO2:");
     u8x8.setCursor(4, rowCO2);
+
     u8x8.print(sensorCO2Read);
   //print CH4 sensor value on LCD
     u8x8.setCursor(0, rowCH4);
