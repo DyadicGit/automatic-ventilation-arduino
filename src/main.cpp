@@ -5,8 +5,8 @@
 #include "../lib/SteinhartHartEquation/SteinhartHartEquation.h"
 
 //User variables:
-const int loopEvery = 500;  //<-- set time to read the value every (in mili seconds)
-const int gasValue = 250; // <-- set this when to clear the air
+const int loopEvery = 5000;  //<-- set time to read the value every (in mili seconds)
+const int gasValue = 500; // <-- set this when to clear the air
 const unsigned long int fanManualWorkTime = 10000;       // set manual fan working time
 const unsigned long int fanAutomaticWorkTime = 5000;    // set automatic fan working time
 
@@ -89,6 +89,8 @@ void setup() {
     u8x8.print(".");
     delay(800);
   }
+  Serial.begin(9600);
+  Serial.println("Started Serial in HVAC");
 }
 
 void loop() {
@@ -216,17 +218,22 @@ void printValuesOnLCD() {
     u8x8.setCursor(0, rowCO2);
     u8x8.print("CO2:");
     u8x8.setCursor(4, rowCO2);
-
     u8x8.print(sensorCO2Read);
+    Serial.print("CO2: ");
+    Serial.println(sensorCO2Read);
   //print CH4 sensor value on LCD
     u8x8.setCursor(0, rowCH4);
     u8x8.print("CH4:");
     u8x8.setCursor(4, rowCH4);
     u8x8.print(sensorCH4Read);
+    Serial.print("CH4: ");
+    Serial.println(sensorCH4Read);
   //print "temp" value on LCD
     u8x8.setCursor(10, rowTemp);
     String strg = String(sensorTempValue, 1) + (char) 0xB0 + "C";
     u8x8.print(strg);
+    String strgNoSymbol = "temp: "+String(sensorTempValue, 1)+"C";
+    Serial.println(strgNoSymbol);
 }
 
 void clearValuesOnLCD() {
