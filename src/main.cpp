@@ -5,7 +5,7 @@
 #include "../lib/SteinhartHartEquation/SteinhartHartEquation.h"
 
 //User variables:
-const int loopEvery = 5000;  //<-- set time to read the value every (in mili seconds)
+const int loopEvery = 10000;  //<-- set time to read the value every (in mili seconds)
 const int gasValue = 500; // <-- set this when to clear the air
 const unsigned long int fanManualWorkTime = 10000;       // set manual fan working time
 const unsigned long int fanAutomaticWorkTime = 5000;    // set automatic fan working time
