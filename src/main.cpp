@@ -6,9 +6,10 @@
 
 //User variables:
 const int loopEvery = 500;  //<-- set time to read the value every (in mili seconds)
-const int gasValue = 250; // <-- set this when to clear the air
-const unsigned long int fanManualWorkTime = 10000;       // set manual fan working time
-const unsigned long int fanAutomaticWorkTime = 5000;    // set automatic fan working time
+const int gasValueCO2 = 170; // <-- set this when to clear the air
+const int gasValueCH4 = 320; // <-- set this when to clear the air
+const unsigned long int fanManualWorkTime = (unsigned long int) 1000*60*15;       // set manual fan working time 15mim
+const unsigned long int fanAutomaticWorkTime =  (unsigned long int) 1000*60*15;    // set automatic fan working time 15min
 
 //machines variables:
 const int sensorCO2Pin = A0;
@@ -113,13 +114,13 @@ void loop() {
     clearValuesOnLCD();
     printValuesOnLCD();
 
-    if (sensorCO2Read > gasValue || sensorCH4Read > gasValue) {
+    if (sensorCO2Read >= gasValueCO2 && sensorCH4Read >= gasValueCH4) {
       digitalWrite(relay1Pin, HIGH);
       digitalWrite(relay2Pin, HIGH);
 
       showWhoTrigerredFan(true);
       delayByMillisPreviouse = 0;
-      int timeCounter = fanAutomaticWorkTime;
+      int timeCounter = (int) fanAutomaticWorkTime;
       while (timeCounter>0 && !fanState) {
         turnOnOffLCD();
         if (isDelayTime(1)) {
@@ -245,8 +246,8 @@ void clearValuesOnLCD() {
 void showWhoTrigerredFan(bool printIt) {
   const int column = 8;
   if (printIt) {
-    if (sensorCO2Read > gasValue) {u8x8.drawTile(column, rowCO2, 1, Icons::ventilator8x8);}
-    if (sensorCH4Read > gasValue) {u8x8.drawTile(column, rowCH4, 1, Icons::ventilator8x8);}
+    if (sensorCO2Read >= gasValueCO2) {u8x8.drawTile(column, rowCO2, 1, Icons::ventilator8x8);}
+    if (sensorCH4Read >= gasValueCH4) {u8x8.drawTile(column, rowCH4, 1, Icons::ventilator8x8);}
   }
   if (!printIt) {
     u8x8.drawString(column, rowCO2, " ");
