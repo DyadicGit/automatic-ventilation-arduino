@@ -1,5 +1,4 @@
 #include <Arduino.h>
-#include <LiquidCrystal.h>
 #include <U8x8lib.h>
 #include "../lib/icons/Icons.h"
 #include "../lib/SteinhartHartEquation/SteinhartHartEquation.h"
@@ -24,7 +23,7 @@ const int ledFan1Pin = 6;
 const int buttonLCDPin = 3;
 const int buttonFanPin = 2;
 const byte ON = LOW;
-const bate OFF = HIGH;
+const byte OFF = HIGH;
 ///calculation variables:
 int sensorCO2Read;
 int sensorCH4Read;
