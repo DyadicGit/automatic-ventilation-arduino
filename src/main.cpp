@@ -5,10 +5,11 @@
 #include "../lib/SteinhartHartEquation/SteinhartHartEquation.h"
 
 //User variables:
-const int loopEvery = 500;  //<-- set time to read the value every (in mili seconds)
+const int loopEvery = 200;  //<-- set time to read the value every (in miliseconds)
 const int gasValueCO2 = 170; // <-- set this when to clear the air
 const int gasValueCH4 = 320; // <-- set this when to clear the air
 const unsigned long int fanManualWorkTime = (unsigned long int) 1000*60*15;       // set manual fan working time 15mim
+const unsigned long int fanTurboModeFraction = (unsigned long int)0.5;            // set Fan turbo mode, ex: half (0.5*fanManualWorkTime)
 const unsigned long int fanAutomaticWorkTime =  (unsigned long int) 1000*60*15;    // set automatic fan working time 15min
 
 //machines variables:
@@ -17,10 +18,13 @@ const int sensorCH4Pin = A1;
 const int sensorTempPin = A3;
 float sensorTempVin = 5; //Volts (Voltage of the microcontoroller)
 float sensorTempLoadResistance = 10000; //Ohms
-const int relay1Pin = 4;
-const int relay2Pin = 5;
+const int relay1FanPin = 4;
+const int relay2TurboModePin = 5;
+const int ledFan1Pin = 6;
 const int buttonLCDPin = 3;
 const int buttonFanPin = 2;
+const byte ON = LOW;
+const bate OFF = HIGH;
 ///calculation variables:
 int sensorCO2Read;
 int sensorCH4Read;
@@ -66,14 +70,14 @@ void setup() {
   pinMode(sensorCO2Pin, INPUT);
   pinMode(sensorCH4Pin, INPUT);
   pinMode(sensorTempPin, INPUT);
-  pinMode(relay1Pin, OUTPUT);
-  pinMode(relay2Pin, OUTPUT);
+  pinMode(relay1FanPin, OUTPUT);
+  pinMode(ledFan1Pin, OUTPUT);
   //momentary buttons
   pinMode(buttonLCDPin, INPUT);
   pinMode(buttonFanPin, INPUT);
   //set initial output pins state
-  digitalWrite(relay1Pin, LOW);
-  digitalWrite(relay2Pin, LOW);
+  digitalWrite(relay1FanPin, OFF);
+  digitalWrite(ledFan1Pin, LOW);
   //button debounce declaration section using interrupts (for Arduino UNO R3 only!)
   attachInterrupt(digitalPinToInterrupt(buttonLCDPin), handleLCDInterrupt, CHANGE);
   attachInterrupt(digitalPinToInterrupt(buttonFanPin), handleFanInterrupt, CHANGE);
@@ -102,7 +106,7 @@ void loop() {
 
   if (fanState) {handleFan();}
 
-  if (isLoopTime()) {
+    if (isLoopTime()) {
     sensorCO2Read = analogRead(sensorCO2Pin);
     sensorCO2Read = floor(sensorCO2Read/10)*10;
     sensorCH4Read = analogRead(sensorCH4Pin);
@@ -115,8 +119,8 @@ void loop() {
     printValuesOnLCD();
 
     if (sensorCO2Read >= gasValueCO2 && sensorCH4Read >= gasValueCH4) {
-      digitalWrite(relay1Pin, HIGH);
-      digitalWrite(relay2Pin, HIGH);
+      digitalWrite(relay1FanPin, ON);
+      digitalWrite(ledFan1Pin, HIGH);
 
       showWhoTrigerredFan(true);
       delayByMillisPreviouse = 0;
@@ -129,8 +133,8 @@ void loop() {
       }
       showWhoTrigerredFan(false);
     } else {
-      digitalWrite(relay1Pin, LOW);
-      digitalWrite(relay2Pin, LOW);
+      digitalWrite(relay1FanPin, OFF);
+      digitalWrite(ledFan1Pin, LOW);
     }
 
     previouseSensorCO2Value = (String) sensorCO2Read;
@@ -181,8 +185,9 @@ void handleFanInterrupt() {
 
 // action handling functions
 void handleFan() {
-  digitalWrite(relay1Pin, HIGH);
-  digitalWrite(relay2Pin, HIGH);
+  digitalWrite(relay1FanPin, ON);
+  digitalWrite(relay2TurboModePin, ON);
+  digitalWrite(ledFan1Pin, HIGH);
 
   int timeCounter = (int) round(fanManualWorkTime/1000);
   u8x8.clearDisplay();
@@ -200,6 +205,9 @@ void handleFan() {
       if (timeCounter < 10000) {u8x8.print("    ");}
       timeCounter--;
     }
+    if (timeCounter >= timeCounter * fanTurboModeFraction) {
+      digitalWrite(relay2TurboModePin, OFF);
+    }
     turnOnOffLCD();
   }
   u8x8.clearDisplay();
@@ -207,11 +215,10 @@ void handleFan() {
   fanState = LOW;
 }
 
-void turnOnOffLCD() {    //used also to handle LCD toggling not in main loop
+void turnOnOffLCD() {
     u8x8.setPowerSave(!LCDState);
 }
 
-//other functions
 void printValuesOnLCD() {
   //print CO2 sensor value on LCD
     u8x8.setCursor(0, rowCO2);
