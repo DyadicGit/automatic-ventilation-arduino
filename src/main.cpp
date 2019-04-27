@@ -5,8 +5,8 @@
 
 //User variables:
 const int loopEvery = 500;  //<-- set time to read the value every (in miliseconds)
-const int gasValueCO2 = 170; // <-- set this when to clear the air
-const int gasValueCH4 = 320; // <-- set this when to clear the air
+const int gasValueCO2 = 160; // <-- set this when to clear the air
+const int gasValueCH4 = 300; // <-- set this when to clear the air
 const unsigned long int fanManualWorkTime = (unsigned long int) 1000*60*0.5;       // set manual fan working time 15mim
 const unsigned long int fanTurboModeWorkTime = (unsigned long int) 1000*60*0.25;  // set fan on turbo mode working time, should be less tan fanManualWorkTime!
 const unsigned long int fanAutomaticWorkTime =  (unsigned long int) 1000*60*1;    // set automatic fan working time 15min
@@ -35,6 +35,7 @@ String previouseSensorTempValue;
 uint8_t rowCO2  = 0;
 uint8_t rowCH4  = 2;
 uint8_t rowTemp = 1;
+const int column = 8;
 //state variables:
 volatile byte LCDState = HIGH;
 volatile byte fanState = LOW;
@@ -73,8 +74,8 @@ void setup() {
   pinMode(relay2TurboModePin, OUTPUT);
   pinMode(ledFan1Pin, OUTPUT);
   //momentary buttons
-  pinMode(buttonLCDPin, INPUT);
-  pinMode(buttonFanPin, INPUT);
+  pinMode(buttonLCDPin, INPUT_PULLUP);
+  pinMode(buttonFanPin, INPUT_PULLUP);
   //set initial output pins state
   digitalWrite(relay1FanPin, OFF);
   digitalWrite(relay2TurboModePin, OFF);
@@ -121,14 +122,14 @@ void loop() {
     clearValuesOnLCD();
     printValuesOnLCD();
 
-    if (sensorCO2Read >= gasValueCO2 && sensorCH4Read >= gasValueCH4) {
+    if (sensorCO2Read >= gasValueCO2 || sensorCH4Read >= gasValueCH4) {
       digitalWrite(relay1FanPin, ON);
       digitalWrite(relay2TurboModePin, OFF);
       digitalWrite(ledFan1Pin, HIGH);
 
       showWhoTrigerredFan(true);
       delayByMillisPreviouse = 0;
-      int timeCounter = (int) fanAutomaticWorkTime;
+      unsigned long int timeCounter = fanAutomaticWorkTime;
       while (timeCounter>0 && !fanState) {
         turnOnOffLCD();
         if (isDelayTime(1)) {
@@ -181,7 +182,7 @@ void handleLCDInterrupt() {
 void handleFanInterrupt() {
   static unsigned long last_interrupt_time = 0;
   unsigned long interrupt_time = millis();
-  if (interrupt_time - last_interrupt_time > 150)
+  if (interrupt_time - last_interrupt_time > 250)
     {
       toggleStateFan();
     }
@@ -258,7 +259,6 @@ void clearValuesOnLCD() {
 }
 
 void showWhoTrigerredFan(bool printIt) {
-  const int column = 8;
   if (printIt) {
     if (sensorCO2Read >= gasValueCO2) {u8x8.drawTile(column, rowCO2, 1, Icons::ventilator8x8);}
     if (sensorCH4Read >= gasValueCH4) {u8x8.drawTile(column, rowCH4, 1, Icons::ventilator8x8);}
