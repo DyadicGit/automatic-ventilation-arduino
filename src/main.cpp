@@ -7,9 +7,12 @@
 const int loopEvery = 500;  //<-- set time to read the value every (in miliseconds)
 const int gasValueCO2 = 160; // <-- set this when to clear the air
 const int gasValueCH4 = 300; // <-- set this when to clear the air
-const unsigned long int fanManualWorkTime = (unsigned long int) 1000*60*15;       // set manual fan working time 15mim
-const unsigned long int fanTurboModeWorkTime = (unsigned long int) 1000*60*7;     // set fan on turbo mode working time, should be less tan fanManualWorkTime!
-const unsigned long int fanAutomaticWorkTime =  (unsigned long int) 1000*60*15;   // set automatic fan working time 15min
+const unsigned long int fanManualWorkTime = (unsigned long int) 1000*60*0.5;       // set manual fan working time 60mim
+const unsigned long int fanTurboModeWorkTime = (unsigned long int) 1000*60*0.25;     // set fan on turbo mode working time, should be less tan fanManualWorkTime! 40min
+const unsigned long int fanAutomaticWorkTime =  (unsigned long int) 1000*60*0.5;   // set automatic fan working time 60min
+const unsigned long EMI_DELAY = 1000;  // wait for the generated EMI from turned on relays to pass by
+const unsigned long debounceIgnoreLCD = 400; // If button press come faster than 50ms ("this variable"), assume it's a bounce and ignore
+const unsigned long debounceIgnoreFan = 300;
 
 //machines variables:
 const int sensorCO2Pin = A0;
@@ -74,15 +77,15 @@ void setup() {
   pinMode(relay2TurboModePin, OUTPUT);
   pinMode(ledFan1Pin, OUTPUT);
   //momentary buttons
-  pinMode(buttonLCDPin, INPUT_PULLUP);
+  pinMode(buttonLCDPin, INPUT);
   pinMode(buttonFanPin, INPUT_PULLUP);
   //set initial output pins state
   digitalWrite(relay1FanPin, OFF);
   digitalWrite(relay2TurboModePin, OFF);
   digitalWrite(ledFan1Pin, LOW);
   //button debounce declaration section using interrupts (for Arduino UNO R3 only!)
-  attachInterrupt(digitalPinToInterrupt(buttonLCDPin), handleLCDInterrupt, CHANGE);
-  attachInterrupt(digitalPinToInterrupt(buttonFanPin), handleFanInterrupt, CHANGE);
+  attachInterrupt(digitalPinToInterrupt(buttonLCDPin), handleLCDInterrupt, FALLING);
+  attachInterrupt(digitalPinToInterrupt(buttonFanPin), handleFanInterrupt, FALLING);
   // set up the LCD:
   u8x8.begin();
   u8x8.setPowerSave(0);
@@ -103,7 +106,6 @@ void loop() {
   if (currentMillis < loopEvery+2027) {      // this code line is just to display that the machine works when it stats for the first time
     u8x8.drawTile(15, 4, 1, Icons::house);  // "2027" is a variable I've got when simulating (experimental principal)
   }
-
   turnOnOffLCD();
 
   if (fanState) {
@@ -126,6 +128,7 @@ void loop() {
       digitalWrite(relay1FanPin, ON);
       digitalWrite(relay2TurboModePin, OFF);
       digitalWrite(ledFan1Pin, HIGH);
+      delay(EMI_DELAY);
 
       showWhoTrigerredFan(true);
       delayByMillisPreviouse = 0;
@@ -141,6 +144,7 @@ void loop() {
       digitalWrite(relay1FanPin, OFF);
       digitalWrite(relay2TurboModePin, OFF);
       digitalWrite(ledFan1Pin, LOW);
+      delay(EMI_DELAY);
     }
 
     previouseSensorCO2Value = (String) sensorCO2Read;
@@ -173,18 +177,18 @@ void handleLCDInterrupt() {
   static unsigned long last_interrupt_time = 0;
   unsigned long interrupt_time = millis();
   // If button press come faster than 50ms, assume it's a bounce and ignore
-  if (interrupt_time - last_interrupt_time > 250)
-    {
-      toggleStateLCD();
+  if (interrupt_time - last_interrupt_time > debounceIgnoreLCD)
+  {
+    toggleStateLCD();
     }
   last_interrupt_time = interrupt_time;
 }
 void handleFanInterrupt() {
   static unsigned long last_interrupt_time = 0;
   unsigned long interrupt_time = millis();
-  if (interrupt_time - last_interrupt_time > 250)
-    {
-      toggleStateFan();
+  if (interrupt_time - last_interrupt_time > debounceIgnoreFan)
+  {
+    toggleStateFan();
     }
   last_interrupt_time = interrupt_time;
 }
@@ -194,6 +198,7 @@ void handleFan() {
   digitalWrite(relay1FanPin, ON);
   digitalWrite(relay2TurboModePin, ON);
   digitalWrite(ledFan1Pin, HIGH);
+  delay(EMI_DELAY);
 
   int timeCounter = (int) round(fanManualWorkTime/1000);
   u8x8.clearDisplay();
@@ -213,6 +218,7 @@ void handleFan() {
     }
     if (timeCounter <= (int)round(fanTurboModeWorkTime / 1000)) {
       digitalWrite(relay2TurboModePin, OFF);
+      delay(EMI_DELAY);
       u8x8.setCursor(0, 0);
       u8x8.print("fan working  ");
     }
