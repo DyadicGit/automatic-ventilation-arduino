@@ -7,9 +7,9 @@
 const int loopEvery = 500;  //<-- set time to read the value every (in miliseconds)
 const int gasValueCO2 = 160; // <-- set this when to clear the air
 const int gasValueCH4 = 300; // <-- set this when to clear the air
-const unsigned long int fanManualWorkTime = (unsigned long int) 1000*60*0.5;       // set manual fan working time 60mim
-const unsigned long int fanTurboModeWorkTime = (unsigned long int) 1000*60*0.25;     // set fan on turbo mode working time, should be less tan fanManualWorkTime! 40min
-const unsigned long int fanAutomaticWorkTime =  (unsigned long int) 1000*60*0.5;   // set automatic fan working time 60min
+const unsigned long int fanManualWorkTime = (unsigned long int) 1000*60*1.2;       // set manual fan working time 60mim
+const unsigned long int fanTurboModeWorkTime = (unsigned long int) 1000*60*0.45;     // set fan on turbo mode working time, should be less tan fanManualWorkTime! 40min
+const unsigned long int fanAutomaticWorkTime =  (unsigned long int) 1000*60*2;   // set automatic fan working time 60min
 const unsigned long EMI_DELAY = 1000;  // wait for the generated EMI from turned on relays to pass by
 const unsigned long debounceIgnoreLCD = 400; // If button press come faster than 50ms ("this variable"), assume it's a bounce and ignore
 const unsigned long debounceIgnoreFan = 300;
@@ -64,7 +64,7 @@ bool isLoopTime();
 bool isDelayTime(unsigned long int delayByMillis);
 void printValuesOnLCD();
 void clearValuesOnLCD();
-void printValuesOnSerial();
+String getHoursMinsSecs(int seconds);
 void turnOnOffLCD();
 void showWhoTrigerredFan(bool printIt);
 float getResistance(float ADCread, float Vin, float R_load);
@@ -207,12 +207,12 @@ void handleFan() {
   u8x8.drawTile(12, 2, 2, Icons::ventilator16x16_1of2);
   u8x8.drawTile(12, 3, 2, Icons::ventilator16x16_2of2);
   u8x8.setCursor(1, 2);
-  u8x8.print(timeCounter);
+  u8x8.print(getHoursMinsSecs(timeCounter));
   delayByMillisPreviouse = 0;
   while (timeCounter>=0 && fanState) {
     if (isDelayTime(1000)) {
       u8x8.setCursor(1, 2);
-      u8x8.print(timeCounter);
+      u8x8.print(getHoursMinsSecs(timeCounter));
       if (timeCounter < 10000) {u8x8.print("    ");}
       timeCounter--;
     }
@@ -263,8 +263,18 @@ void clearValuesOnLCD() {
       u8x8.clearDisplay();
     }
 }
+String getHoursMinsSecs(int seconds) {
+  int hoursRemaining = seconds / 3600;
+  int minutesRemaining = (seconds % 3600) / 60;
+  int secondsRemaining = seconds % 60;
 
-void showWhoTrigerredFan(bool printIt) {
+  return (hoursRemaining != 0 ? (String) hoursRemaining + "h " : "") 
+       + (minutesRemaining != 0 ? (String) minutesRemaining + "m " : "") 
+       + (secondsRemaining != 0 ? (String) secondsRemaining + "s" : "");
+};
+
+void showWhoTrigerredFan(bool printIt)
+{
   if (printIt) {
     if (sensorCO2Read >= gasValueCO2) {u8x8.drawTile(column, rowCO2, 1, Icons::ventilator8x8);}
     if (sensorCH4Read >= gasValueCH4) {u8x8.drawTile(column, rowCH4, 1, Icons::ventilator8x8);}
