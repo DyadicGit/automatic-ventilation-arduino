@@ -7,9 +7,9 @@
 const int loopEvery = 500;  //<-- set time to read the value every (in miliseconds)
 const int gasValueCO2 = 160; // <-- set this when to clear the air
 const int gasValueCH4 = 300; // <-- set this when to clear the air
-const unsigned long int fanManualWorkTime = (unsigned long int) 1000*60*1.2;       // set manual fan working time 60mim
-const unsigned long int fanTurboModeWorkTime = (unsigned long int) 1000*60*0.45;     // set fan on turbo mode working time, should be less tan fanManualWorkTime! 40min
-const unsigned long int fanAutomaticWorkTime =  (unsigned long int) 1000*60*2;   // set automatic fan working time 60min
+const unsigned long int fanManualWorkTime = (unsigned long int) 1000*60*60;       // set manual fan working time 60mim
+const unsigned long int fanTurboModeWorkTime = (unsigned long int) 1000*60*45;     // set fan on turbo mode working time, should be less tan fanManualWorkTime! 40min
+const unsigned long int fanAutomaticWorkTime =  (unsigned long int) 1000*60*90;   // set automatic fan working time 60min
 const unsigned long EMI_DELAY = 1000;  // wait for the generated EMI from turned on relays to pass by
 const unsigned long debounceIgnoreLCD = 400; // If button press come faster than 50ms ("this variable"), assume it's a bounce and ignore
 const unsigned long debounceIgnoreFan = 300;
