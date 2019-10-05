@@ -6,7 +6,7 @@
 //User variables:
 const int loopEvery = 2000;                                                         //<-- set time to read the value every (in miliseconds)
 const int gasValueCO2 = 120;                                                       // <-- set this when to clear the air
-const int gasValueCH4 = 290;                                                       // <-- set this when to clear the air
+const int gasValueCH4 = 340;                                                       // <-- set this when to clear the air
 const unsigned long int fanManualWorkTime = (unsigned long int)1000 * 60 * 60;    // set manual fan working time
 const unsigned long int fanTurboModeWorkTime = (unsigned long int)1000 * 60 * 35;  // set fan on turbo mode working time, should be less tan fanManualWorkTime!
                                                                                    // ex.: fanManualWorkTime=60min & fanTurboModeWorkTime=45min, then the fan will work 15mins in turbo mode,the it'll switch to low speed
